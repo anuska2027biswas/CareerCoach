@@ -4,9 +4,11 @@ const groq = new Groq({
   apiKey: process.env.GROQ_API_KEY
 });
 
+// MOCK INTERVIEW GENERATION WITH AI //
+
 const generateMockInterview = async (resumeText) => {
 
-  // Limit resume length to avoid token overflow
+  
   const trimmedResume = resumeText.slice(0, 6000);
 
   const prompt = `
@@ -89,4 +91,92 @@ Return JSON only.
 };
 
 
-export { generateMockInterview };
+// RESUME PARSING WITH AI //
+
+
+const parseResumeWithAI = async (resumeText) => {
+
+  const trimmedResume = resumeText.slice(0, 6000);
+
+  const prompt = `
+You are an AI Resume Parser.
+
+Analyze the following resume and extract structured information.
+
+RESUME:
+${trimmedResume}
+
+Return ONLY valid JSON in this format:
+
+{
+"name":"",
+"email":"",
+"phone":"",
+"address":"",
+"bio":"",
+"linkedin":"",
+"github":"",
+"portfolio":"",
+"skills":[],
+"projects":[
+  {
+    "title":"",
+    "description":"",
+    "technologies":[]
+  }
+],
+"experience":[
+  {
+    "company":"",
+    "role":"",
+    "duration":"",
+    "description":""
+  }
+],
+"education":[
+  {
+    "institution":"",
+    "degree":"",
+    "year":""
+  }
+],
+"achievements":[]
+}
+
+Rules:
+- Skills must be an array
+- Projects must contain title, description and technologies
+- If information is missing return null
+- Do not include explanation
+- Return JSON only
+`;
+
+  const response = await groq.chat.completions.create({
+    model: "llama-3.1-8b-instant",
+    messages: [
+      {
+        role: "system",
+        content: "You extract structured resume data in JSON."
+      },
+      {
+        role: "user",
+        content: prompt
+      }
+    ],
+    temperature: 0.2
+  });
+
+  const rawOutput = response.choices[0].message.content;
+
+  const jsonMatch = rawOutput.match(/\{[\s\S]*\}/);
+
+  if (!jsonMatch) {
+    throw new Error("Invalid AI response format");
+  }
+
+  const parsedData = JSON.parse(jsonMatch[0]);
+
+  return parsedData;
+};
+
+export { parseResumeWithAI , generateMockInterview };
