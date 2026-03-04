@@ -1,4 +1,4 @@
-const mongoose=require('mongoose');
+import mongoose from 'mongoose'
 
 const resumeSchema=new mongoose.Schema(
     {
@@ -7,11 +7,9 @@ const resumeSchema=new mongoose.Schema(
             ref:"User",
             required:true,
         },
-        filename:{
-            type:String
-        },
         fileUrl:{
             type:String,
+            required:true,
         },
         ExtractedData:{
             summary:String,
@@ -22,4 +20,8 @@ const resumeSchema=new mongoose.Schema(
     },
     {timestamps:true}
 );
-mongoose.exports=mongoose.model('Resume',resumeSchema);
+
+
+const ResumeModel = mongoose.model("Resume" , resumeSchema);
+
+export default ResumeModel;

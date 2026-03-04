@@ -1,18 +1,32 @@
-const mongoose=require('mongoose');
+import mongoose from 'mongoose'
 
-const interviewSchema=new mongoose.Schema(
+const interviewSchema = new mongoose.Schema(
     {
-        user:{
-            type:mongoose.Schema.Types.ObjectId,
-            ref:"User",
-            required:true,
+        user: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "User",
         },
-        technicalRound: [String],
-        experienceRound: [String],
-        hrRound: [String],
-  },
-  { timestamps: true }
-    
+        resumeURL: {
+            type: String,
+            required: true,
+        },
+        rounds: {
+            type: Object,
+            required: true,
+        },
+        status: {
+            type: String,
+            enum: ["Generated", "In Progress", "Not Completed"],
+            default: "Not Completed"
+        }
+    },
+    { timestamps: true }
+
 )
-module.exports=mongoose.model("Interview",interviewSchema);
+
+
+const InterviewModel = mongoose.model("Interview", interviewSchema);
+
+export default InterviewModel;
+
 
