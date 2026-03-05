@@ -245,6 +245,75 @@ Rules:
   return parsed;
 };
 
+// INTERVIEW PREPARATION QUESTION GENERATION WITH AI //
+
+const generateInterviewPrep = async (role, experience, seniority) => {
+
+  const prompt = `
+You are a senior technical interviewer.
+
+Generate interview preparation questions for the following candidate profile:
+
+Role: ${role}
+Experience Level: ${experience}
+Seniority: ${seniority}
+
+Requirements:
+
+- Generate EXACTLY 20 questions
+- Each question must include a detailed answer
+- Questions should simulate real technical interviews
+- Mix conceptual, practical, and scenario-based questions
+- Difficulty should vary (easy, medium, hard)
+
+Return ONLY valid JSON in this format:
+
+{
+  "role": "",
+  "experience_level": "",
+  "seniority": "",
+  "questions": [
+    {
+      "question": "",
+      "answer": "",
+      "difficulty": "",
+      "topic": ""
+    }
+  ]
+}
+
+Rules:
+- No markdown
+- No explanation
+- Return JSON only
+`;
+
+  const response = await groq.chat.completions.create({
+    model: "llama-3.1-8b-instant",
+    messages: [
+      {
+        role: "system",
+        content: "You generate structured JSON interview preparation content."
+      },
+      {
+        role: "user",
+        content: prompt
+      }
+    ],
+    temperature: 0.5
+  });
+
+  const rawOutput = response.choices[0].message.content;
+
+  const jsonMatch = rawOutput.match(/\{[\s\S]*\}/);
+
+  if (!jsonMatch) {
+    throw new Error("Invalid AI response format");
+  }
+
+  return JSON.parse(jsonMatch[0]);
+};
 
 
-export { parseResumeWithAI , generateMockInterview  , analyzeResumeWithAI};
+
+export { parseResumeWithAI , generateMockInterview  , analyzeResumeWithAI , generateInterviewPrep};
