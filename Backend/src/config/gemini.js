@@ -179,4 +179,72 @@ Rules:
   return parsedData;
 };
 
-export { parseResumeWithAI , generateMockInterview };
+
+// RESUME ANALYZER WITH AI //
+
+// RESUME ANALYZER WITH AI //
+
+const analyzeResumeWithAI = async (resumeText) => {
+
+  const trimmedResume = resumeText.slice(0, 6000);
+
+  const prompt = `
+You are an expert ATS Resume Analyzer used by top tech companies.
+
+Analyze the following resume and provide a professional resume evaluation.
+
+RESUME:
+${trimmedResume}
+
+Return ONLY valid JSON in the following format:
+
+{
+  "ats_score": 0,
+  "strengths": [],
+  "weaknesses": [],
+  "missing_keywords": [],
+  "suggestions": []
+}
+
+Rules:
+- ATS score must be between 0 and 100
+- Strengths must highlight what the candidate did well
+- Weaknesses must highlight what is missing or poorly written
+- Missing keywords should be important industry keywords not present in the resume
+- Skill analysis should categorize candidate skills
+- Suggestions should provide actionable improvements
+- Return JSON only
+- Do NOT include explanations
+`;
+
+  const response = await groq.chat.completions.create({
+    model: "llama-3.1-8b-instant",
+    messages: [
+      {
+        role: "system",
+        content: "You analyze resumes and return structured JSON only."
+      },
+      {
+        role: "user",
+        content: prompt
+      }
+    ],
+    temperature: 0.3
+  });
+
+  const rawOutput = response.choices[0].message.content;
+
+  const jsonMatch = rawOutput.match(/\{[\s\S]*\}/);
+
+  if (!jsonMatch) {
+    throw new Error("Invalid AI response format");
+  }
+
+  const parsed = JSON.parse(jsonMatch[0]);
+
+  return parsed;
+};
+
+
+
+export { parseResumeWithAI , generateMockInterview  , analyzeResumeWithAI};

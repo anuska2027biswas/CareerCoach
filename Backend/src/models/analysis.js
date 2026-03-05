@@ -1,24 +1,38 @@
-const mongoose = require("mongoose");
+import mongoose from "mongoose";
 
-const analysisSchema = new mongoose.Schema(
-  {
-    user: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-      required: true,
-    },
 
-    AtsScore: {
-      type: Number,
-      min: 0,
-      max: 100,
-    },
-
-    strengths: [String],
-    weaknesses: [String],
-    suggestions: [String],
+const analysisSchema = new mongoose.Schema({
+  resumeURL: {
+    type: String,
   },
-  { timestamps: true }
-);
+  atsScore: {
+    type: Number,
+    required: true,
+  },
+  strength: [
+    {
+      type: String,
+    }
+  ],
+  weakness: [
+    {
+      type: String,
+    }
+  ],
+  missingKeywords: [
+    {
+      type: String
+    }
+  ],
+  suggestions: [
+    {
+      type : String
+    }
+  ]
+} , {
+  timestamps: true
+})
 
-module.exports = mongoose.model("Analysis", analysisSchema);
+const AnalysisModel = mongoose.model("Analysis", analysisSchema);
+
+export default AnalysisModel;
