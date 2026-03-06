@@ -4,9 +4,12 @@ import interviewRoutes from "./routes/interviewRoutes.js";
 import connectDB from "./config/db.js";
 import resumeRoutes from "./routes/resumeRoutes.js";
 import analysisRoutes from "./routes/analysisRoutes.js";
-import interviewPrepRoutes from "./routes/interviewPrep.js";
+import interviewPrepRoutes from "./routes/interviewPrep.js"
+import authRoutes from "./routes/authRoutes.js";
+import authRoutes from "./routes/authRoutes.js";
 import letterRoutes from "./routes/letterRoutes.js";
 import jobMatchRoute from "./routes/jobMatchRoute.js";
+
 
 const PORT = process.env.PORT || 8001;
 const app = express();
@@ -19,7 +22,7 @@ app.get('/health', (req, res) => {
     message: "Server is LIVE"
   })
 })
-
+app.use('/api/auth',authRoutes);
 app.use('/api/interview', interviewRoutes);
 app.use('/api/resume', resumeRoutes);
 app.use('/api/resumeAnalyzer', analysisRoutes);
