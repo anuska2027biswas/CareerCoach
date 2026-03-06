@@ -1,21 +1,22 @@
-const mongoose=require('mongoose');
+import mongoose from 'mongoose'
+
 
 const UserSchema=new mongoose.Schema(
     {
-        UserName:{
+        userName:{
             type:String,
             required:true,
             trim:true,
             unique : true 
         },
-        email:{
+        userEmail:{
             type:String,
             required:true,
             unique:true,
             lowercase:true,
             index:true,
         },
-        UseRole:{
+        userRole:{
             type:String,
             enum:['Candidate','Recruiter'],
             required:true,
@@ -30,4 +31,5 @@ const UserSchema=new mongoose.Schema(
     {timestamps:true}
 );
 
-module.exports=mongoose.model('User',UserSchema);
+const User=mongoose.model('User',UserSchema);
+export default User
