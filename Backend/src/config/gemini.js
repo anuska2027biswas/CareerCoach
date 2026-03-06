@@ -8,7 +8,7 @@ const groq = new Groq({
 
 const generateMockInterview = async (resumeText) => {
 
-  
+
   const trimmedResume = resumeText.slice(0, 6000);
 
   const prompt = `
@@ -314,6 +314,140 @@ Rules:
   return JSON.parse(jsonMatch[0]);
 };
 
+// MOCK COVER LETTER  GENERATION WITH AI //
 
 
-export { parseResumeWithAI , generateMockInterview  , analyzeResumeWithAI , generateInterviewPrep};
+const generateCoverLetter = async (role, company, description) => {
+
+  const prompt = `
+You are a professional career assistant.
+
+Generate a strong, professional cover letter for the following job.
+
+Job Role: ${role}
+Company: ${company}
+
+Job Description:
+${description}
+
+Requirements:
+
+- Write a professional cover letter
+- Tailor it to the job description
+- Highlight relevant technical skills
+- Keep it concise (150–250 words)
+- Sound confident and professional
+
+Return ONLY the cover letter text.
+Do not return JSON.
+`;
+
+  const response = await groq.chat.completions.create({
+    model: "llama-3.1-8b-instant",
+    messages: [
+      {
+        role: "system",
+        content: "You generate professional cover letters."
+      },
+      {
+        role: "user",
+        content: prompt
+      }
+    ],
+    temperature: 0.6
+  });
+
+  return response.choices[0].message.content;
+};
+
+
+// JOB MATCHING ANALYSIS WITH AI //
+
+const analyzeJobMatch = async (resumeText, jobDescription) => {
+
+  const trimmedResume = resumeText.slice(0, 5000);
+  const trimmedJD = jobDescription.slice(0, 3000);
+
+  const prompt = `
+You are an ATS Resume Matching System used by recruiters.
+
+Your job is to STRICTLY evaluate how well the resume matches the job description.
+
+RESUME:
+${trimmedResume}
+
+JOB DESCRIPTION:
+${trimmedJD}
+
+First analyze the job description and identify the **key required skills and requirements**.
+
+Then compare them with the resume and calculate a match score using this rule:
+
+SCORING METHOD:
+- Identify important skills in the job description
+- Count how many of those appear in the resume
+
+Score calculation guideline:
+
+90–100 → Almost perfect match (most required skills present)
+75–89 → Strong match (many skills present, minor gaps)
+60–74 → Moderate match (some skills present)
+40–59 → Weak match (few relevant skills)
+0–39 → Poor match (very little alignment)
+
+Important:
+- Do NOT give high scores if important skills are missing
+- Do NOT give low scores if most requirements are satisfied
+- The score must realistically reflect the match
+
+Return ONLY valid JSON in this format:
+
+{
+ "match_score": 0,
+ "matching_skills": [],
+ "missing_skills": [],
+ "strengths": [],
+ "improvements": [],
+ "summary": ""
+}
+
+Rules:
+- match_score must be between 0 and 100
+- matching_skills → skills present in both resume and job description
+- missing_skills → skills required but missing in resume
+- strengths → strong alignment points
+- improvements → ways the resume could better match the job
+- summary → short explanation of the score
+- Return JSON only
+`;
+
+  const response = await groq.chat.completions.create({
+    model: "llama-3.1-8b-instant",
+    messages: [
+      {
+        role: "system",
+        content: "You analyze resume-job matches and return JSON."
+      },
+      {
+        role: "user",
+        content: prompt
+      }
+    ],
+    temperature: 0.3
+  });
+
+  const rawOutput = response.choices[0].message.content;
+
+  const jsonMatch = rawOutput.match(/\{[\s\S]*\}/);
+
+  if (!jsonMatch) {
+    throw new Error("Invalid AI response format");
+  }
+
+  return JSON.parse(jsonMatch[0]);
+};
+
+
+
+
+export { parseResumeWithAI, generateMockInterview, analyzeResumeWithAI, generateInterviewPrep, generateCoverLetter, analyzeJobMatch };
